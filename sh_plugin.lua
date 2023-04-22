@@ -31,3 +31,31 @@ end
 hook.Add("KeyPress", "CombatMode", function(ply, key)
     PLUGIN:KeyPress(ply, key)
 end)
+
+-- Создаем опцию Target в контекстном меню
+properties.Add("Target", {
+    -- Устанавливаем текст и иконку опции
+    MenuLabel = "Target",
+    MenuIcon = "icon16/eye.png",
+
+    -- Создаем функцию проверки, которая возвращает true, если выбранный объект является игроком и находится в зоне видимости
+    Filter = function(self, ent, ply)
+        -- Проверяем, что объект является игроком
+        if (!IsValid(ent) or !ent:IsPlayer()) then return false end
+        -- Проверяем, что объект находится в зоне видимости
+        local trace = ply:GetEyeTrace()
+        if (trace.Entity != ent) then return false end
+        -- Возвращаем true
+        return true
+    end,
+
+    -- Создаем функцию действия, которая устанавливает выбранный объект как цель для атаки
+    Action = function(self, ent)
+        -- Получаем локального игрока
+        local ply = LocalPlayer()
+        -- Устанавливаем выбранный объект как цель
+        ply:SetNWEntity("target", ent)
+        -- Отправляем сообщение в локальный чат
+        chat.AddText(Color(255, 255, 255), "You have selected ", ent:Nick(), " as your target.")
+    end
+})
